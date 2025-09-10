@@ -1,0 +1,377 @@
+﻿@model Dashboard.Models.DispenserLog
+@{
+    ViewBag.Title = "Dispenser Log Sheet";
+    var dispenser = ViewBag.Dispenser as Dashboard.Models.Dispenser;
+}
+
+<div class="container-fluid hospital-ui-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card hospital-card shadow-lg">
+                <div class="card-header hospital-card-header">
+                    <div class="d-flex align-items-center">
+                        <div class="hospital-dispenser-icon me-3">
+                            <i class="fas fa-pump-medical"></i>
+                        </div>
+                        <div>
+                            <h2 class="mb-1">Dispenser Maintenance Log</h2>
+                            <p class="hospital-location mb-0">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                <strong>@dispenser.DispenserID</strong> | @dispenser.Location
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <form asp-controller="DispenserLogs" asp-action="SubmitLog" method="post" class="needs-validation" novalidate>
+                        <input type="hidden" asp-for="DispenserID" value="@dispenser.DispenserID" />
+
+                        <!-- Date & Time -->
+                        <div class="hospital-log-section mb-4">
+                            <div class="hospital-section-header">
+                                <i class="fas fa-calendar-check me-2"></i>Date & Time
+                            </div>
+                            <div class="input-group mt-2">
+                                <span class="input-group-text hospital-input-group-text">
+                                    <i class="fas fa-clock"></i>
+                                </span>
+                                <input type="text" class="form-control hospital-input"
+                                       value="@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")" readonly />
+                            </div>
+                        </div>
+
+                        <!-- Staff Info -->
+                        <div class="hospital-log-section mb-4">
+                            <div class="hospital-section-header">
+                                <i class="fas fa-user-nurse me-2"></i>Staff Information
+                            </div>
+                            <div class="mt-2">
+                                <label asp-for="StaffName" class="form-label hospital-label">Your Name / Initials</label>
+                                <div class="input-group">
+                                    <span class="input-group-text hospital-input-group-text">
+                                        <i class="fas fa-signature"></i>
+                                    </span>
+                                    <input asp-for="StaffName" class="form-control hospital-input"
+                                           placeholder="Enter your name or staff initials" required />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Select Action -->
+                        <div class="hospital-log-section mb-4">
+                            <label class="form-label hospital-label">Select Action</label>
+                            <select id="actionSelect" asp-for="ActionTaken" class="form-select hospital-input" required>
+                                <option value="">-- Select Action --</option>
+                                <option value="Refill">Refill</option>
+                                <option value="Check">Check</option>
+                                <option value="Replace">Replace</option>
+                            </select>
+
+                            <!-- Replace Options -->
+                            <div class="hospital-log-section mt-3" id="replaceOptions" style="display: none;">
+                                <label class="form-label d-block">Select Volume (required):</label>
+
+                                <!-- 1 Liter -->
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="checkbox1L" value="1L">
+                                    <label class="form-check-label" for="checkbox1L">1 Liter</label>
+                                </div>
+
+                                <!-- 500ml -->
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="checkbox500ml" value="500ml">
+                                    <label class="form-check-label" for="checkbox500ml">500 ml</label>
+                                </div>
+
+                                <!-- Error -->
+                                <div class="text-danger mt-1" id="volumeError" style="display:none;">
+                                    Please select one volume when replacing.
+                                </div>
+                            </div>
+
+                            <!-- Hidden binded field -->
+                            <input type="hidden" asp-for="Volume" id="selectedVolume" />
+
+                            <!-- Preview -->
+                            <div class="hospital-action-preview mt-2" id="actionPreview">
+                                <span class="text-muted">No action selected</span>
+                            </div>
+                        </div>
+
+                        <!-- Additional Notes -->
+                        <div class="hospital-log-section mb-4">
+                            <div class="hospital-section-header">
+                                <i class="fas fa-comment-medical me-2"></i>Additional Notes
+                            </div>
+                            <div class="mt-2">
+                                <label asp-for="Remarks" class="form-label hospital-label">Remarks</label>
+                                <div class="input-group">
+                                    <span class="input-group-text hospital-input-group-text align-items-start">
+                                        <i class="fas fa-notes-medical"></i>
+                                    </span>
+                                    <textarea asp-for="Remarks" class="form-control hospital-input"
+                                              rows="3" placeholder="Any additional notes or observations..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn hospital-btn-submit btn-lg py-3">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Maintenance Log
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content hospital-modal">
+            <div class="modal-body text-center p-5">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="hospital-modal-success">
+                        <div class="hospital-modal-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h4 class="hospital-modal-title">Log Submitted Successfully!</h4>
+                        <p>@TempData["Success"]</p>
+                        <button type="button" class="btn hospital-btn-primary mt-3" data-bs-dismiss="modal">
+                            <i class="fas fa-thumbs-up me-2"></i>Continue
+                        </button>
+                    </div>
+                }
+                else if (TempData["Error"] != null)
+                {
+                    <div class="hospital-modal-error">
+                        <div class="hospital-modal-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <h4 class="hospital-modal-title">Submission Error</h4>
+                        <p class="text-danger">@TempData["Error"]</p>
+                        <button type="button" class="btn hospital-btn-danger mt-3" data-bs-dismiss="modal">
+                            <i class="fas fa-redo me-2"></i>Try Again
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        :root {
+            --hospital-primary: #1a6fc9;
+            --hospital-primary-light: #e1f0ff;
+            --hospital-primary-dark: #0d4b8a;
+            --hospital-secondary: #f8f9fa;
+            --hospital-accent: #5cb3ff;
+            --hospital-text: #2d3e50;
+            --hospital-border: #d1e3f6;
+            --hospital-success: #28a745;
+            --hospital-danger: #e74c3c;
+            --hospital-warning: #ffc107;
+        }
+
+        .hospital-ui-container {
+            padding: 2rem 0;
+        }
+
+        .hospital-card {
+            border-radius: 12px;
+            border: none;
+            overflow: hidden;
+            transition: 0.3s ease;
+        }
+
+            .hospital-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 30px rgba(26,111,201,0.15);
+            }
+
+        .hospital-card-header {
+            background: linear-gradient(135deg,var(--hospital-primary),var(--hospital-primary-dark));
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .hospital-dispenser-icon {
+            font-size: 2rem;
+            background: rgba(255,255,255,0.2);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hospital-location {
+            opacity: .9;
+            font-size: .95rem;
+        }
+
+        .hospital-log-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.25rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid var(--hospital-border);
+        }
+
+        .hospital-section-header {
+            color: var(--hospital-primary-dark);
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 2px solid var(--hospital-primary-light);
+            margin-bottom: .5rem;
+        }
+
+        .hospital-label {
+            font-weight: 600;
+            color: var(--hospital-primary-dark);
+        }
+
+        .hospital-input {
+            border: 1px solid var(--hospital-border);
+            border-radius: 8px;
+            padding: .75rem 1rem;
+            transition: all .3s ease;
+        }
+
+            .hospital-input:focus {
+                border-color: var(--hospital-accent);
+                box-shadow: 0 0 0 .25rem rgba(26,111,201,.15);
+            }
+
+        .hospital-action-preview {
+            background-color: var(--hospital-primary-light);
+            border-radius: 8px;
+            padding: .75rem 1rem;
+            min-height: 50px;
+        }
+
+        .hospital-btn-submit {
+            background-color: var(--hospital-success);
+            border: none;
+            font-weight: 600;
+            letter-spacing: .5px;
+            border-radius: 8px;
+            transition: .3s;
+        }
+
+            .hospital-btn-submit:hover {
+                background-color: #218838;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(40,167,69,.25);
+            }
+
+        .hospital-modal {
+            border-radius: 12px;
+            border: none;
+        }
+
+        .hospital-modal-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .hospital-modal-success .hospital-modal-icon {
+            color: var(--hospital-success);
+        }
+
+        .hospital-modal-error .hospital-modal-icon {
+            color: var(--hospital-danger);
+        }
+    </style>
+}
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const actionSelect = document.getElementById('actionSelect');
+            const replaceOptions = document.getElementById('replaceOptions');
+            const actionPreview = document.getElementById('actionPreview');
+            const volumeError = document.getElementById('volumeError');
+            const selectedVolumeInput = document.getElementById('selectedVolume');
+
+            const checkbox1L = document.getElementById('checkbox1L');
+            const checkbox500ml = document.getElementById('checkbox500ml');
+
+            function resetVolumeSelection() {
+                checkbox1L.checked = false;
+                checkbox500ml.checked = false;
+                selectedVolumeInput.value = "";
+                volumeError.style.display = "none";
+            }
+
+            function handleCheckboxChange(changed, other) {
+                if (changed.checked) {
+                    other.checked = false;
+                    selectedVolumeInput.value = changed.value;
+                    volumeError.style.display = "none";
+                } else {
+                    selectedVolumeInput.value = "";
+                }
+            }
+
+            checkbox1L.addEventListener('change', () => handleCheckboxChange(checkbox1L, checkbox500ml));
+            checkbox500ml.addEventListener('change', () => handleCheckboxChange(checkbox500ml, checkbox1L));
+
+            actionSelect.addEventListener('change', function () {
+                const selectedAction = this.value;
+                const currentDate = new Date().toLocaleString();
+
+                if (!selectedAction) {
+                    actionPreview.innerHTML = '<span class="text-muted">No action selected</span>';
+                    replaceOptions.style.display = 'none';
+                    resetVolumeSelection();
+                    return;
+                }
+
+                actionPreview.innerHTML = `<strong>${selectedAction}</strong> selected on <em>${currentDate}</em>`;
+
+                if (selectedAction === "Replace") {
+                    replaceOptions.style.display = 'block';
+                } else {
+                    replaceOptions.style.display = 'none';
+                    resetVolumeSelection();
+                }
+            });
+
+            // Validation for Replace action
+            const form = document.querySelector('.needs-validation');
+            form.addEventListener('submit', function(event) {
+                if (actionSelect.value === "Replace" && !selectedVolumeInput.value) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    volumeError.style.display = "block";
+                    return;
+                }
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+
+            // Show modal if success/error
+            const hasMessage = '@TempData["Success"]' || '@TempData["Error"]';
+            if (hasMessage.trim() !== '') {
+                const feedbackModal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+                feedbackModal.show();
+                if ('@TempData["Success"]') {
+                    setTimeout(() => { feedbackModal.hide(); }, 3000);
+                }
+            }
+        });
+    </script>
+}

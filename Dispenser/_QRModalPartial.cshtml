@@ -1,0 +1,226 @@
+﻿@model Dashboard.Models.Dispenser
+
+<div class="hospital-modal-header">
+    <div class="d-flex align-items-center">
+        <div class="hospital-qr-icon me-3">
+            <i class="fas fa-qrcode"></i>
+        </div>
+        <div>
+            <h5 class="hospital-modal-title mb-0">Dispenser Identification</h5>
+            <p class="hospital-modal-subtitle mb-0">QR Code for @Model.DispenserID</p>
+        </div>
+    </div>
+    <button type="button" class="btn-close hospital-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body text-center" id="qr-print-area">
+    <div class="hospital-qr-card">
+        <div class="hospital-qr-info">
+            <div class="hospital-info-item">
+                <i class="fas fa-tag me-2"></i>
+                <strong>Dispenser ID:</strong> @Model.DispenserID
+            </div>
+            <div class="hospital-info-item">
+                <i class="fas fa-map-marker-alt me-2"></i>
+                <strong>Location:</strong> @Model.Location
+            </div>
+            <div class="hospital-info-item">
+                <i class="fas fa-building me-2"></i>
+                <strong>Unit:</strong> @Model.UnitID
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.QRCodeURL))
+        {
+            <div class="hospital-qr-container">
+                <!-- QR Code Image -->
+                <div class="hospital-qr-frame">
+                    <img id="qr-code-img"
+                         src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=@Model.QRCodeURL"
+                         alt="QR Code"
+                         class="img-fluid" />
+                </div>
+
+                <!-- URL Display -->
+                <div class="hospital-qr-url mt-3">
+                    <a href="@Model.QRCodeURL" target="_blank" class="hospital-link">
+                        <i class="fas fa-link me-2"></i>@Model.QRCodeURL
+                    </a>
+                </div>
+
+                <!-- Scan Hint -->
+                <div class="hospital-scan-hint mt-2">
+                    <i class="fas fa-mobile-screen me-2"></i>Scan to access dispenser
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="hospital-qr-missing">
+                <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                <p class="text-danger">QR code not available for this dispenser</p>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal-footer hospital-modal-footer">
+    <button type="button" class="btn hospital-btn-secondary" data-bs-dismiss="modal">
+        <i class="fas fa-times me-2"></i>Close
+    </button>
+
+    @if (!string.IsNullOrEmpty(Model.QRCodeURL))
+    {
+        <a class="btn hospital-btn-primary"
+           href="@Url.Action("GenerateQRCodePDF", "Dashboard", new { id = Model.DispenserID })"
+           target="_blank">
+            <i class="fas fa-file-pdf me-2"></i>Download PDF
+        </a>
+    }
+</div>
+
+<style>
+    .hospital-modal-header {
+        background: linear-gradient(135deg, #1a6fc9, #0d4b8a);
+        color: white;
+        padding: 1.25rem;
+        border-bottom: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .hospital-qr-icon {
+        font-size: 1.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hospital-modal-title {
+        font-weight: 600;
+        font-size: 1.25rem;
+    }
+
+    .hospital-modal-subtitle {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    .hospital-close-btn {
+        filter: invert(1) brightness(2);
+        opacity: 0.8;
+    }
+
+    .hospital-qr-card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 1px solid #d1e3f6;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .hospital-qr-info {
+        background-color: #f5f9ff;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        text-align: left;
+    }
+
+    .hospital-info-item {
+        margin-bottom: 0.5rem;
+        color: #2d3e50;
+    }
+
+        .hospital-info-item:last-child {
+            margin-bottom: 0;
+        }
+
+    .hospital-qr-frame {
+        background-color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        display: inline-block;
+        border: 1px solid #e1f0ff;
+        box-shadow: 0 2px 8px rgba(26, 111, 201, 0.1);
+    }
+
+    .hospital-qr-url {
+        background-color: #f5f9ff;
+        padding: 0.5rem;
+        border-radius: 6px;
+        word-break: break-all;
+    }
+
+    .hospital-link {
+        color: #1a6fc9;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+        .hospital-link:hover {
+            color: #0d4b8a;
+            text-decoration: underline;
+        }
+
+    .hospital-scan-hint {
+        color: #5cb3ff;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .hospital-qr-missing {
+        padding: 2rem;
+        background-color: #fff8f8;
+        border-radius: 8px;
+        border: 1px dashed #e74c3c;
+    }
+
+    .hospital-modal-footer {
+        border-top: 1px solid #d1e3f6;
+        padding: 1rem;
+    }
+
+    .hospital-btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+    }
+
+        .hospital-btn-secondary:hover {
+            background-color: #5a6268;
+            color: white;
+        }
+
+    .hospital-btn-primary {
+        background-color: #1a6fc9;
+        color: white;
+        border: none;
+    }
+
+        .hospital-btn-primary:hover {
+            background-color: #0d4b8a;
+            color: white;
+        }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation to QR code on load
+        const qrCode = document.getElementById('qr-code-img');
+        if (qrCode) {
+            qrCode.style.opacity = '0';
+            qrCode.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                qrCode.style.opacity = '1';
+            }, 100);
+        }
+    });
+</script>

@@ -1,0 +1,215 @@
+﻿@{
+    ViewData["Title"] = "Staff Verification";
+    var dispenserId = ViewBag.DispenserID as string ?? Context.Request.Query["dispenserId"].ToString();
+    var verifiedCode = Context.Session.GetString("VerifiedStaffCode");
+}
+
+<div class="container-fluid hospital-ui-container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-lg-5 col-md-7">
+            <div class="card hospital-card shadow-lg border-0">
+                <div class="card-header hospital-card-header text-center py-4">
+                    <div class="hospital-verification-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h3 class="mb-0 mt-3">Staff Identity Verification</h3>
+                    <p class="text-muted mb-0">Please enter your credentials to access the medication log</p>
+                </div>
+
+                <div class="card-body p-4 p-sm-5">
+                    <form method="post" asp-action="VerifyStaff" asp-controller="DispenserLogs" class="needs-validation" novalidate>
+                        <input type="hidden" name="dispenserId" value="@dispenserId" />
+
+                        <div class="mb-4">
+                            <label class="form-label hospital-label">
+                                <i class="fas fa-id-card me-2"></i>Staff Identification Code
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text hospital-input-group-text">
+                                    <i class="fas fa-user-md"></i>
+                                </span>
+                                <input type="text" name="staffCode" class="form-control hospital-input"
+                                       placeholder="Enter your initials or staff code (e.g., MJ or ST-001)"
+                                       required />
+                            </div>
+                            <small class="form-text text-muted hospital-hint">
+                                Use your assigned staff code or initials (2-6 characters)
+                            </small>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn hospital-btn-primary btn-lg py-3">
+                                <i class="fas fa-fingerprint me-2"></i>Verify Identity
+                            </button>
+                        </div>
+
+                        @if (TempData["Error"] != null)
+                        {
+                            <div class="alert hospital-alert-danger mt-4">
+                                <i class="fas fa-exclamation-triangle me-2"></i>@TempData["Error"]
+                            </div>
+                        }
+                    </form>
+                </div>
+
+                <div class="card-footer hospital-card-footer text-center py-3">
+                    <small class="text-muted">
+                        <i class="fas fa-lock me-1"></i>Your credentials are securely verified
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        :root {
+            --hospital-primary: #1a6fc9;
+            --hospital-primary-light: #e1f0ff;
+            --hospital-primary-dark: #0d4b8a;
+            --hospital-secondary: #f8f9fa;
+            --hospital-accent: #5cb3ff;
+            --hospital-text: #2d3e50;
+            --hospital-border: #d1e3f6;
+            --hospital-danger: #e74c3c;
+        }
+
+        body {
+            background-color: #f5f9ff;
+            background-image: linear-gradient(135deg, rgba(92, 179, 255, 0.03) 0%, rgba(26, 111, 201, 0.03) 100%);
+            color: var(--hospital-text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .min-vh-100 {
+            min-height: 100vh;
+        }
+
+        .hospital-ui-container {
+            padding: 2rem;
+        }
+
+        .hospital-card {
+            border-radius: 12px;
+            border: none;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .hospital-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 30px rgba(26, 111, 201, 0.15);
+            }
+
+        .hospital-card-header {
+            background: linear-gradient(135deg, var(--hospital-primary), var(--hospital-primary-dark));
+            color: white;
+            border-bottom: none;
+        }
+
+        .hospital-verification-icon {
+            font-size: 2.5rem;
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .hospital-label {
+            font-weight: 600;
+            color: var(--hospital-primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .hospital-input {
+            border: 1px solid var(--hospital-border);
+            border-radius: 0 8px 8px 0 !important;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+            .hospital-input:focus {
+                border-color: var(--hospital-accent);
+                box-shadow: 0 0 0 0.25rem rgba(26, 111, 201, 0.15);
+            }
+
+        .hospital-input-group-text {
+            background-color: var(--hospital-primary-light);
+            border: 1px solid var(--hospital-border);
+            border-right: none;
+            color: var(--hospital-primary);
+            border-radius: 8px 0 0 8px !important;
+        }
+
+        .hospital-btn-primary {
+            background-color: var(--hospital-primary);
+            border: none;
+            padding: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+            .hospital-btn-primary:hover {
+                background-color: var(--hospital-primary-dark);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(26, 111, 201, 0.25);
+            }
+
+        .hospital-alert-danger {
+            background-color: #fdecea;
+            color: var(--hospital-danger);
+            border-left: 4px solid var(--hospital-danger);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .hospital-hint {
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            color: #6c757d;
+        }
+
+        .hospital-card-footer {
+            background-color: var(--hospital-secondary);
+            border-top: 1px solid var(--hospital-border);
+        }
+    </style>
+}
+
+@section Scripts {
+    @if (!string.IsNullOrEmpty(verifiedCode))
+    {
+        <script>
+            // Staff already verified, redirect to LogForm automatically
+            window.location.href = "/DispenserLogs/LogForm?dispenserId=@dispenserId";
+        </script>
+    }
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Add input validation
+            const form = document.querySelector('.needs-validation');
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+
+            // Focus on the input field when page loads
+            document.querySelector('input[name="staffCode"]').focus();
+        });
+    </script>
+}

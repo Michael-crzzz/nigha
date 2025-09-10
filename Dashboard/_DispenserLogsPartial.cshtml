@@ -1,0 +1,23 @@
+﻿@model List<Dashboard.Models.Dispenser>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Last Refill</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var dispenser in Model)
+        {
+            <tr>
+                <td>@dispenser.DispenserID</td>
+                <td>@dispenser.Location</td>
+                <td>@dispenser.Status</td> <!-- Make sure this property exists -->
+                <td>@dispenser.LastRefill</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,68 @@
+﻿
+
+<!-- Dispensers List Partial View -->
+@if (ViewBag.FilteredUnitID != null)
+{
+    <div class="alert alert-info d-flex justify-content-between align-items-center">
+        <div>
+            Showing dispensers for unit: <strong>@ViewBag.FilteredUnitName</strong> (@ViewBag.FilteredUnitID)
+        </div>
+        <a href="@Url.Action("Index", "Dashboard")" class="btn btn-sm btn-outline-secondary">Clear Filter</a>
+    </div>
+
+    <h4>Dispensers</h4>
+    <a asp-controller="Dispenser" asp-action="Create" class="btn btn-success mb-3">Add New Dispenser</a>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Dispenser ID</th>
+                <th>Location</th>
+                <th>Unit</th>
+                <th>Date Added</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var d in Model.Dispensers)
+            {
+                <tr>
+                    <td>
+                        <a href="javascript:void(0);" data-id="@d.DispenserID"
+                           data-bs-toggle="modal" data-bs-target="#qrModal"
+                           class="text-primary open-qr-modal">
+                            @d.DispenserID
+                        </a>
+                    </td>
+                    <td>@(d.Location ?? "—")</td>
+                    <td>@(d.Unit?.UnitName ?? "—")</td>
+                    <td>@d.DateAdded.ToString("yyyy-MM-dd")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<!-- Modal container -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" id="qrModalContent">
+            <!-- QR content will be loaded here -->
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).on("click", ".open-qr-modal", function () {
+            var dispenserId = $(this).data("id");
+            $("#qrModalContent").html('<div class="modal-body text-center p-4"><div class="spinner-border text-primary"></div><p class="mt-2">Loading...</p></div>');
+
+            $.get('/Dispenser/Details', { id: dispenserId }, function (data) {
+                $("#qrModalContent").html(data);
+            });
+        });
+    </script>
+}
+    
+

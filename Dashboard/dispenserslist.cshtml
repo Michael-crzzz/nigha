@@ -1,0 +1,365 @@
+﻿@model DashboardViewModel
+
+<div class="dispensers-section">
+    <div class="section-header">
+        <div class="header-content">
+            <!-- Back Button -->
+            <div class="container mb-3">
+                <div class="row">
+                    <div class="col">
+                        <button onclick="history.back()" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <h3><i class="fas fa-pump-medical me-2"></i>Dispensers Management</h3>
+
+           
+            <a asp-controller="Dispenser" asp-action="Create" class="add-dispenser-btn">
+                <i class="fas fa-plus-circle me-2"></i>Add New Dispenser
+            </a>
+        </div>
+        <div class="header-actions">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search dispensers...">
+            </div>
+        </div>
+    </div>
+
+    <div class="dispensers-table-container">
+        <table class="dispensers-table">
+            <thead>
+                <tr>
+                    <th class="qr-col"><i class="fas fa-qrcode"></i> Dispenser ID</th>
+                    <th><i class="fas fa-map-marker-alt"></i> Location</th>
+                    <th><i class="fas fa-hospital"></i> Unit</th>
+                    <th><i class="fas fa-calendar-alt"></i> Date Added</th>
+                    <th class="actions-col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var d in Model.Dispensers)
+                {
+                    <tr>
+                        <td>
+                            <a href="javascript:void(0);" data-id="@d.DispenserID"
+                               data-bs-toggle="modal" data-bs-target="#qrModal"
+                               class="dispenser-id open-qr-modal">
+                                <i class="fas fa-qrcode me-2"></i>@d.DispenserID
+                            </a>
+                        </td>
+                        <td>
+                            <div class="location-cell">
+                                @if (!string.IsNullOrEmpty(d.Location))
+                                {
+                                    <i class="fas fa-map-pin"></i> 
+                                    @d.Location
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            @if (d.Unit != null)
+                            {
+                                <span class="unit-badge">@d.Unit.UnitName</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="date-added">
+                                <i class="far fa-calendar me-2"></i>
+                                @d.DateAdded.ToString("MMM dd, yyyy")
+                            </div>
+                        </td>
+                        <td class="actions">
+                            <button class="btn-action view" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-action edit" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Enhanced QR Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content hospital-modal">
+            <div class="modal-body" id="qrModalContent">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Base Styles */
+    :root {
+        --hospital-blue: #1a6fc9;
+        --hospital-blue-light: #e1f0ff;
+        --hospital-blue-dark: #0d4b8a;
+        --hospital-green: #28a745;
+        --hospital-gray: #6c757d;
+        --hospital-light: #f8f9fa;
+    }
+
+    /* Dispensers Section */
+    .dispensers-section {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, var(--hospital-blue), var(--hospital-blue-dark));
+        color: white;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+    }
+
+    .section-header h3 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.4rem;
+    }
+
+    .section-header i {
+        margin-right: 10px;
+    }
+
+    .add-dispenser-btn {
+        background: var(--hospital-green);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 500;
+        margin-left: 20px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+        .add-dispenser-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            color: white;
+        }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+    }
+
+    .search-box {
+        position: relative;
+        margin-left: 15px;
+    }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--hospital-gray);
+        }
+
+        .search-box input {
+            padding: 8px 15px 8px 35px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            min-width: 250px;
+        }
+
+    /* Table Styles */
+    .dispensers-table-container {
+        overflow-x: auto;
+        padding: 0 20px 20px;
+    }
+
+    .dispensers-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        .dispensers-table thead th {
+            background: var(--hospital-blue-light);
+            color: var(--hospital-blue-dark);
+            padding: 15px;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 2px solid var(--hospital-blue);
+        }
+
+        .dispensers-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+            .dispensers-table tbody tr:hover {
+                background-color: var(--hospital-blue-light);
+            }
+
+        .dispensers-table tbody td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        .dispensers-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+    /* Special Column Styles */
+    .qr-col {
+        width: 25%;
+    }
+
+    .actions-col {
+        width: 120px;
+        text-align: center;
+    }
+
+    /* Cell Styles */
+    .dispenser-id {
+        color: var(--hospital-blue);
+        font-weight: 500;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+        .dispenser-id:hover {
+            color: var(--hospital-blue-dark);
+            text-decoration: underline;
+        }
+
+    .location-cell {
+        display: flex;
+        align-items: center;
+    }
+
+        .location-cell i {
+            margin-right: 8px;
+            color: var(--hospital-gray);
+        }
+
+    .unit-badge {
+        background: var(--hospital-blue-light);
+        color: var(--hospital-blue-dark);
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .date-added {
+        display: flex;
+        align-items: center;
+        color: var(--hospital-gray);
+    }
+
+        .date-added i {
+            margin-right: 8px;
+        }
+
+    /* Action Buttons */
+    .actions {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .btn-action.view {
+            background: var(--hospital-blue-light);
+            color: var(--hospital-blue);
+        }
+
+        .btn-action.edit {
+            background: #fff8e6;
+            color: #ffc107;
+        }
+
+        .btn-action:hover {
+            transform: scale(1.1);
+        }
+
+    /* Modal Styles */
+    .hospital-modal {
+        border-radius: 12px;
+        overflow: hidden;
+        border: none;
+    }
+
+        .hospital-modal .modal-body {
+            padding: 0;
+        }
+</style>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // QR Modal handling
+            $(document).on("click", ".open-qr-modal", function () {
+                var dispenserId = $(this).data("id");
+                $("#qrModalContent").html(`
+                    <div class="text-center p-5">
+                        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+                        <p class="mt-3">Loading dispenser details...</p>
+                    </div>
+                `);
+
+                $.get('/Dispenser/Details', { id: dispenserId }, function (data) {
+                    $("#qrModalContent").html(data);
+                });
+            });
+
+            // Search functionality
+            $('.search-box input').on('keyup', function() {
+                var value = $(this).val().toLowerCase();
+                $('.dispensers-table tbody tr').filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+}

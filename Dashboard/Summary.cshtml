@@ -1,0 +1,114 @@
+﻿@model Dashboard.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Summary";
+}
+
+<h1 class="text-center mb-4">Alcohol Summary Report</h1>
+
+<!-- Back Button -->
+<div class="container mb-3">
+    <div class="row">
+        <div class="col">
+            <button onclick="history.back()" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-center mt-3 mb-5">
+    <form method="get" asp-action="Summary">
+        <select name="unitName"
+                class="form-select w-25"
+                onchange="this.form.submit()"
+                asp-items="@(ViewBag.UnitList as List<SelectListItem>)">
+            <option value="">-- Select Area --</option>
+        </select>
+    </form>
+</div>
+
+<div class="container mb-5">
+    <div class="row">
+        <!-- Line Chart -->
+        <div class="col-md-6">
+            <canvas id="lineChart"></canvas>
+        </div>
+
+        <!-- Bar Chart -->
+        <div class="col-md-6">
+            <canvas id="barChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover">
+        <thead>
+            <tr>
+                <th> Room </th>
+                <th> Previous Refill </th>
+                <th> Latest Refill </th>
+                <th> Days since refill </th>
+                <th> Replaced Date </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var log in Model.RecentLogs)
+            {
+                <tr>
+                    <td>@log.Dispenser?.Location</td>
+
+                    <td>
+                        @{
+                            var prev = Model.RecentLogs
+                            .Where(l => l.DispenserID == log.DispenserID && l.DateTime < log.DateTime)
+                            .OrderByDescending(l => l.DateTime)
+                            .FirstOrDefault();
+                            @prev?.DateTime.ToString("yyyy-MM-dd HH:mm")
+                        }
+                    </td>
+                    <td>@log.DateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@((DateTime.Now - log.DateTime).Days)</td>
+                    <td>@(log.ActionTaken == "Replace" ? log.DateTime.ToString("yyyy-MM-dd") : "-")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Line Chart
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartLabels)),
+            datasets: [{
+                label: 'Usage by Volume',
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartData)),
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false,
+                tension: 0.3
+            }]
+        }
+    });
+
+    // Bar Chart
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartLabels)),
+            datasets: [{
+                label: 'Replacement Count',
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartData)),
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        }
+    });
+</script>

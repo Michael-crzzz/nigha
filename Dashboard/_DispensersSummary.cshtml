@@ -1,0 +1,23 @@
+﻿@model List<Dashboard.Models.Dispenser>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Location</th>
+            <th>Unit</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model)
+        {
+            <tr>
+                <td>@d.DispenserID</td>
+                <td>@d.Location</td>
+                <td>@d.Unit</td>
+                 <td>@d.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>

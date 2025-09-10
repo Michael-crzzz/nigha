@@ -1,0 +1,34 @@
+﻿@{
+    ViewBag.Title = "Log Submitted";
+    var dispenserId = ViewBag.DispenserID as string;
+}
+
+<div class="container mt-5 text-center">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    <h2 class="text-success mb-4">✅ Log Submitted Successfully</h2>
+    <p class="lead">Your action has been recorded.</p>
+
+    <div class="mt-4">
+        <a href="@Url.Action("VerifyStaff", "DispenserLogs", new { dispenserId = dispenserId })" class="btn btn-primary me-2">Submit Another Log</a>
+        <button class="btn btn-secondary" onclick="tryClose()">Close Page</button>
+
+        <script>
+            function tryClose() {
+                window.close();
+
+                // Fallback alert if window didn't close
+                setTimeout(() => {
+                    if (!window.closed) {
+                        alert("This tab cannot be closed automatically. Please close it manually.");
+                    }
+                }, 100);
+            }
+        </script>
+    </div>
+</div>
